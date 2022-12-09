@@ -9,7 +9,10 @@ def CreateDataset(opt):
         dataset = TemporalDataset()   
     elif opt.dataset_mode == 'face':
         from data.face_dataset import FaceDataset
-        dataset = FaceDataset() 
+        dataset = FaceDataset()
+    elif opt.dataset_mode == 'EAA':
+        from data.EAA_dataset import EAADataset
+        dataset = EAADataset()
     elif opt.dataset_mode == 'pose':
         from data.pose_dataset import PoseDataset
         dataset = PoseDataset() 

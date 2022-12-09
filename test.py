@@ -13,7 +13,7 @@ from util.visualizer import Visualizer
 from util import html
 
 opt = TestOptions().parse(save=False)
-opt.nThreads = 1   # test code only supports nThreads = 1
+opt.nThreads = 0   # test code only supports nThreads = 1
 opt.batchSize = 1  # test code only supports batchSize = 1
 opt.serial_batches = True  # no shuffle
 opt.no_flip = True  # no flip
@@ -27,12 +27,16 @@ visualizer = Visualizer(opt)
 input_nc = 1 if opt.label_nc != 0 else opt.input_nc
 
 save_dir = os.path.join(opt.results_dir, opt.name, '%s_%s' % (opt.phase, opt.which_epoch))
+v_idx = -1
 print('Doing %d frames' % len(dataset))
+save_idx = 0
 for i, data in enumerate(dataset):
     if i >= opt.how_many:
         break    
     if data['change_seq']:
         model.fake_B_prev = None
+        save_idx = 0
+        v_idx += 1
 
     _, _, height, width = data['A'].size()
     A = Variable(data['A']).view(1, -1, input_nc, height, width)
@@ -49,6 +53,8 @@ for i, data in enumerate(dataset):
     visual_list = [('real_A', real_A), 
                    ('fake_B', util.tensor2im(generated[0].data[0]))]
     visuals = OrderedDict(visual_list) 
-    img_path = data['A_path']
+    img_path = [data['A_path'][0].replace('.npy', f'_{save_idx:05d}.jpg')]
     print('process image... %s' % img_path)
-    visualizer.save_images(save_dir, visuals, img_path)
+    visualizer.save_images(save_dir + str(v_idx), visuals, img_path)
+
+    save_idx += 1

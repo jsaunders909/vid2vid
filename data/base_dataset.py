@@ -5,6 +5,7 @@ from PIL import Image
 import torchvision.transforms as transforms
 import numpy as np
 import random
+import cv2
 
 class BaseDataset(data.Dataset):
     def __init__(self):
@@ -158,19 +159,26 @@ def toTensor_normalize():
     return transforms.Compose(transform_list)
 
 def __scale_image(img, size, method=Image.BICUBIC):
-    w, h = size    
+    w, h = size
+    if isinstance(img, np.ndarray):
+        return cv2.resize(img, (w, h))
+
     return img.resize((w, h), method)
 
 def __crop(img, size, pos):
     ow, oh = img.size
     tw, th = size
     x1, y1 = pos        
-    if (ow > tw or oh > th):        
+    if (ow > tw or oh > th):
+        if isinstance(img, np.ndarray):
+            return img[x1:min(ow, x1 + tw), y1:min(oh, y1 + th)]
         return img.crop((x1, y1, min(ow, x1 + tw), min(oh, y1 + th)))
     return img
 
 def __flip(img, flip):
     if flip:
+        if isinstance(img, np.ndarray):
+            return cv2.flip(img, 2)
         return img.transpose(Image.FLIP_LEFT_RIGHT)
     return img
 
